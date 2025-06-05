@@ -1,0 +1,44 @@
+# monitoring/traefik.yml
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: "websecure"
+          scheme: "https"
+  websecure:
+    address: ":443"
+
+api:
+  dashboard: true
+  insecure: false
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik_proxy
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: hannanhridoy@gmail.com
+      storage: "/acme.json"
+      tlsChallenge: {}
+      # httpChallenge:
+      #   entryPoint: web
+      # caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+metrics:
+  prometheus:
+    entryPoint: websecure
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0
